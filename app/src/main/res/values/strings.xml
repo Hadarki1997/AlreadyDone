@@ -3,4 +3,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="welcome_text">ברוכים הבאים</string>
+    <string name="welcome_image_desc">תיאור תמונת ברוך הבא</string>
+    <string name="welcome_message">ברוכים הבאים ל-כבר תרמתי, הפלטפורמה המובילה שלכם ליצירת שינוי חברתי חיובי. אצלנו, כל תרומה, גדולה או קטנה, עושה הבדל ומסייעת להגשים חלומות, לתמוך בקהילות ולפעול למען מטרות חשובות. הצטרפו אלינו במסע להפיכת העולם למקום טוב יותר, תרומה אחת בכל פעם.</string>
 </resources>
