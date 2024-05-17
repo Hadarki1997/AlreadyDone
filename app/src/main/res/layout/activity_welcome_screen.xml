@@ -37,7 +37,7 @@
         android:layout_height="70dp"
         android:text="בואו נתחיל"
         android:backgroundTint="@color/button_color"
-        android:textSize="20dp"
+        android:textSize="18sp"
         android:fontFamily="@font/roboto_bold"/>
 
 
