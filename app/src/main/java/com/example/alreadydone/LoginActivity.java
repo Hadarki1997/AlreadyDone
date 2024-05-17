@@ -59,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void loginUser(String email, String password) throws JSONException {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://<YOUR_SERVER_IP>:<YOUR_SERVER_PORT>/login";
+        String url = "http://<SERVER_IP>:<SERVER_PORT>/login";
 
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("email", email);
