@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- הוספת הרשאה לחיבור לאינטרנט -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -26,7 +25,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity" />
+        <activity android:name=".LoginActivity"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity android:name=".HomeActivity" />
 
     </application>
