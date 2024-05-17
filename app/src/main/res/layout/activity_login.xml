@@ -7,7 +7,7 @@
     android:background="#FCF5F5"> <!-- צבע רקע ורוד בהיר -->
 
     <ImageView
-        android:layout_width="320dp"
+        android:layout_width="370dp"
         android:layout_height="367dp"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
