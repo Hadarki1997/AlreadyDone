@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AlreadyDone"
         tools:targetApi="31">
-        <activity android:name=".welcomescreen"
+        <activity android:name=".WelcomeScreen"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:exported="true">
             <intent-filter>
