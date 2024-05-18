@@ -2,9 +2,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
     android:padding="16dp"
-    android:background="#FDEEEE">
+    android:background="#FCF5F5"
+    android:gravity="right">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/register"
+        android:contentDescription="@string/welcome_image_desc"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp" />
 
     <EditText
         android:id="@+id/full_name"
@@ -32,26 +43,52 @@
         android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="סיסמה:"
+        android:hint=":סיסמה"
         android:padding="16dp"
         android:background="@drawable/edit_text_background"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:inputType="textPassword"
         android:gravity="right" />
 
-    <CheckBox
-        android:id="@+id/terms_checkbox"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="אני מסכימ/ה לתנאים וההגבלות"
-        android:layout_marginBottom="16dp" />
+        android:orientation="horizontal"
+        android:layout_below="@id/password"
+        android:layout_marginBottom="10dp"
+        android:gravity="end"
+        android:layout_gravity="end">
+
+        <TextView
+            android:id="@+id/terms_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:gravity="end"
+            android:onClick="onTermsClick"
+            android:text="אני מסכימ/ה לתנאים וההגבלות"
+            android:textSize="18dp" />
+
+        <CheckBox
+            android:id="@+id/terms_checkbox"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:gravity="end"
+            android:layoutDirection="rtl" />
+
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/button_register"
-        android:layout_width="wrap_content"
+        android:layout_width="229dp"
         android:layout_height="wrap_content"
-        android:text="הרשם"
-        android:backgroundTint="#FFB6B6"
+        android:layout_gravity="center"
+        android:backgroundTint="#FCC2C2"
         android:padding="16dp"
+        android:text="הרשם"
+        android:textSize="20dp"
         android:textColor="#FFFFFF" />
+
+
 </LinearLayout>
