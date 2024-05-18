@@ -10,15 +10,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.example.alreadydone.api.ApiService;
+import com.example.alreadydone.api.ApiResponse;
+import com.example.alreadydone.api.LoginRequest;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
 
             try {
                 loginUser(email, password);
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });
@@ -65,41 +65,38 @@ public class LoginActivity extends AppCompatActivity {
         return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
-    private void loginUser(String email, String password) throws JSONException {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://<SERVER_IP>:<SERVER_PORT>/login";
+    private void loginUser(String email, String password) {
+        Retrofit retrofit = RetrofitClient.getClient("http://<SERVER_IP>:<SERVER_PORT>");
+        ApiService apiService = retrofit.create(ApiService.class);
 
-        JSONObject jsonBody = new JSONObject();
-        jsonBody.put("email", email);
-        jsonBody.put("password", password);
+        LoginRequest loginRequest = new LoginRequest(email, password);
+        Call<ApiResponse> call = apiService.loginUser(loginRequest);
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            if (response.getBoolean("success")) {
-                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                editor.putBoolean("isLoggedIn", true);
-                                editor.apply();
-
-                                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                Toast.makeText(LoginActivity.this, response.getString("message"), Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
+        call.enqueue(new Callback<ApiResponse>() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    if (response.body().isSuccess()) {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean("isLoggedIn", true);
+                        editor.apply();
+
+                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(LoginActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(LoginActivity.this, "שגיאה בעת ניסיון ההתחברות", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                t.printStackTrace();
+                Toast.makeText(LoginActivity.this, "שגיאה בעת ניסיון ההתחברות", Toast.LENGTH_SHORT).show();
             }
         });
-
-        queue.add(jsonObjectRequest);
     }
 }

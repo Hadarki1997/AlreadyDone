@@ -14,6 +14,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.alreadydone.api.ApiService;
+import com.example.alreadydone.api.ApiResponse;
+import com.example.alreadydone.api.RegisterRequest;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText fullNameEditText, emailEditText, passwordEditText;
@@ -79,9 +88,35 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerUser(String fullName, String email, String password) {
-        // לוגיקת הרישום
-        Toast.makeText(this, "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show();
-        // ניתן לנווט למסך הלוגין או למסך הראשי אחרי רישום
+        Retrofit retrofit = RetrofitClient.getClient("http://<SERVER_IP>:<SERVER_PORT>");
+        ApiService apiService = retrofit.create(ApiService.class);
+
+        RegisterRequest registerRequest = new RegisterRequest(fullName, email, password);
+        Call<ApiResponse> call = apiService.registerUser(registerRequest);
+
+        call.enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    if (response.body().isSuccess()) {
+                        Toast.makeText(RegisterActivity.this, "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(RegisterActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(RegisterActivity.this, "שגיאה בעת ניסיון הרישום", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                t.printStackTrace();
+                Toast.makeText(RegisterActivity.this, "שגיאה בעת ניסיון הרישום", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void showTermsDialog() {
@@ -124,8 +159,6 @@ public class RegisterActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
-
 
     private class HebrewInputFilter implements InputFilter {
         @Override
