@@ -5,25 +5,30 @@ import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.alreadydone.api.ApiService;
 import com.example.alreadydone.api.ApiResponse;
 import com.example.alreadydone.api.RegisterRequest;
+import com.example.alreadydone.callback.ApiCallback;
+import com.example.alreadydone.callback.OnApiResponse;
+import com.example.alreadydone.RetrofitClient;
 
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class RegisterActivity extends AppCompatActivity {
+    private static final String TAG = "RegisterActivity";
+    private static final String BASE_URL = "https://d77ad679-7033-4412-87f6-6604e1868684.mock.pstmn.io/";
 
     private EditText fullNameEditText, emailEditText, passwordEditText;
     private CheckBox termsCheckBox;
@@ -45,8 +50,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         fullNameEditText.setFilters(new InputFilter[]{new HebrewInputFilter()});
 
-        termsTextView1.setOnClickListener(v -> showTermsDialog());
-
         loginTextView.setOnClickListener(v -> {
             Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             startActivity(intent);
@@ -58,26 +61,22 @@ public class RegisterActivity extends AppCompatActivity {
             String password = passwordEditText.getText().toString();
 
             if (validateInput(fullName, email, password)) {
-                registerUser(fullName, email, password);
+                checkEmailExistence(fullName, email, password);
             }
         });
     }
 
     private boolean validateInput(String fullName, String email, String password) {
-        if (TextUtils.isEmpty(fullName)) {
-            fullNameEditText.setError("שם מלא נדרש");
+        if (TextUtils.isEmpty(fullName) || !fullName.matches("[א-ת ]+")) {
+            fullNameEditText.setError("שם מלא נדרש וחייב להכיל אותיות עבריות בלבד");
             return false;
         }
-        if (!fullName.matches("[א-ת ]+")) {
-            fullNameEditText.setError("שם חייב להכיל אותיות עבריות בלבד");
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches() || !email.endsWith(".com")) {
+            emailEditText.setError("פורמט מייל לא תקין או שהאימייל לא מסתיים ב-.com");
             return false;
         }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailEditText.setError("פורמט מייל לא תקין");
-            return false;
-        }
-        if (TextUtils.isEmpty(password)) {
-            passwordEditText.setError("סיסמה נדרשת");
+        if (TextUtils.isEmpty(password) || password.length() <= 6) {
+            passwordEditText.setError("סיסמה נדרשת וחייבת להיות יותר מ-6 תווים");
             return false;
         }
         if (!termsCheckBox.isChecked()) {
@@ -87,37 +86,37 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
-    private void registerUser(String fullName, String email, String password) {
-        Retrofit retrofit = RetrofitClient.getClient("http://<SERVER_IP>:<SERVER_PORT>");
-        ApiService apiService = retrofit.create(ApiService.class);
 
+    private void checkEmailExistence(String fullName, String email, String password) {
+        Retrofit retrofit = RetrofitClient.getClient(BASE_URL);
+        ApiService apiService = retrofit.create(ApiService.class);
+        Call<ApiResponse> call = apiService.checkEmail(email);
+        call.enqueue(new ApiCallback(response -> {
+            if (response.isSuccess()) {
+                Toast.makeText(RegisterActivity.this, "האימייל כבר קיים במערכת", Toast.LENGTH_SHORT).show();
+            } else {
+                registerUser(fullName, email, password);
+            }
+        }, this, "שגיאה בבדיקת קיום האימייל"));
+    }
+
+    private void registerUser(String fullName, String email, String password) {
+        Retrofit retrofit = RetrofitClient.getClient(BASE_URL);
+        ApiService apiService = retrofit.create(ApiService.class);
         RegisterRequest registerRequest = new RegisterRequest(fullName, email, password);
         Call<ApiResponse> call = apiService.registerUser(registerRequest);
-
-        call.enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    if (response.body().isSuccess()) {
-                        Toast.makeText(RegisterActivity.this, "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Toast.makeText(RegisterActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(RegisterActivity.this, "שגיאה בעת ניסיון הרישום", Toast.LENGTH_SHORT).show();
-                }
+        call.enqueue(new ApiCallback(response -> {
+            if (response.isSuccess()) {
+                Toast.makeText(RegisterActivity.this, "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                Toast.makeText(RegisterActivity.this, response.getMessage(), Toast.LENGTH_SHORT).show();
             }
-
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable t) {
-                t.printStackTrace();
-                Toast.makeText(RegisterActivity.this, "שגיאה בעת ניסיון הרישום", Toast.LENGTH_SHORT).show();
-            }
-        });
+        }, this, "שגיאה בעת ניסיון הרישום"));
     }
+
 
     private void showTermsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

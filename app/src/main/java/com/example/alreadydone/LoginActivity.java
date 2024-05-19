@@ -24,7 +24,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
     private Button loginButton;
-    private TextView registerTextView; // הוספת TextView לרישום
+    private TextView registerTextView;
     private SharedPreferences sharedPreferences;
 
     @Override
@@ -47,9 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(v -> {
             String email = emailEditText.getText().toString();
             String password = passwordEditText.getText().toString();
-
-            if (!isValidEmail(email)) {
-                Toast.makeText(LoginActivity.this, "Invalid email format", Toast.LENGTH_SHORT).show();
+            if (!validateLoginInput(email, password)) {
                 return;
             }
 
@@ -61,12 +59,25 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private boolean validateLoginInput(String email, String password) {
+        if (!isValidEmail(email)) {
+            emailEditText.setError("פורמט מייל לא תקין");
+            return false;
+        }
+        if (TextUtils.isEmpty(password) || password.length() <= 6) {
+            passwordEditText.setError("סיסמה נדרשת והסיסמה חייבת להיות יותר מ-6 תווים");
+            return false;
+        }
+        return true;
+    }
+
     private boolean isValidEmail(CharSequence email) {
-        return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches() && email.toString().endsWith(".com");
     }
 
     private void loginUser(String email, String password) {
-        Retrofit retrofit = RetrofitClient.getClient("http://<SERVER_IP>:<SERVER_PORT>");
+        String baseUrl = "https://985d412b-c46f-47fb-aa1b-898fa60ebb10.mock.pstmn.io/";
+        Retrofit retrofit = RetrofitClient.getClient(baseUrl);
         ApiService apiService = retrofit.create(ApiService.class);
 
         LoginRequest loginRequest = new LoginRequest(email, password);
