@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    android:background="#FCF5F5"> <!-- צבע רקע ורוד בהיר -->
+    android:background="#FCF5F5">
 
     <ImageView
         android:layout_width="370dp"
