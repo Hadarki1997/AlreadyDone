@@ -14,22 +14,22 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.alreadydone.api.ApiService;
-import com.example.alreadydone.api.RegisterRequest;
-import com.example.alreadydone.api.ApiResponse;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
-
-    private static final String TAG = "RegisterActivity";
 
     private EditText fullNameEditText, emailEditText, passwordEditText;
     private Button registerButton;
     private CheckBox termsCheckBox;
     private TextView loginLink;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +43,9 @@ public class RegisterActivity extends AppCompatActivity {
         termsCheckBox = findViewById(R.id.terms_checkbox);
         loginLink = findViewById(R.id.login_text);
 
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
         fullNameEditText.setFilters(new InputFilter[]{new HebrewInputFilter()});
 
         registerButton.setOnClickListener(v -> {
@@ -52,7 +55,16 @@ public class RegisterActivity extends AppCompatActivity {
 
             if (validateInput(fullName, email, password)) {
                 if (termsCheckBox.isChecked()) {
-                    registerUser(fullName, email, password);
+                    checkEmailExists(email, new EmailCheckCallback() {
+                        @Override
+                        public void onEmailChecked(boolean exists) {
+                            if (exists) {
+                                emailEditText.setError("מייל זה כבר קיים במערכת");
+                            } else {
+                                registerUser(fullName, email, password);
+                            }
+                        }
+                    });
                 } else {
                     showTermsDialog();
                 }
@@ -74,43 +86,46 @@ public class RegisterActivity extends AppCompatActivity {
             emailEditText.setError("פורמט מייל לא תקין");
             return false;
         }
-        if (TextUtils.isEmpty(password)) {
-            passwordEditText.setError("סיסמה נדרשת");
+        if (!isPasswordStrong(password)) {
+            passwordEditText.setError("הסיסמה צריכה להכיל לפחות 8 תווים שיכילו אות גדולה קטנה מספר מיוחד ותו");
             return false;
         }
         return true;
     }
 
+    private boolean isPasswordStrong(String password) {
+        Pattern pattern = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
+        return pattern.matcher(password).matches();
+    }
+
     private void registerUser(String fullName, String email, String password) {
-        String baseUrl = "https://674d-2a0d-6fc2-6830-6c00-2da1-7ece-ca3e-e552.ngrok-free.app";
-        Retrofit retrofit = RetrofitClient.getClient(baseUrl);
-        ApiService apiService = retrofit.create(ApiService.class);
-
-        RegisterRequest registerRequest = new RegisterRequest(fullName, email, password);
-        Call<ApiResponse> registerCall = apiService.registerUser(registerRequest);
-        registerCall.enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String message = response.body().getMessage();
-                    if ("Successfully registered!".equals(message)) {
-                        Toast.makeText(RegisterActivity.this, "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                        startActivity(intent);
-                        finish();
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            saveUserToFirestore(user.getUid(), fullName, email, password);
+                        }
                     } else {
-                        Toast.makeText(RegisterActivity.this, message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "הרשמה נכשלה: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(RegisterActivity.this, "שגיאה בעת ניסיון הרישום", Toast.LENGTH_SHORT).show();
-                }
-            }
+                });
+    }
 
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable t) {
-                Toast.makeText(RegisterActivity.this, "שגיאה בעת ניסיון הרישום", Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void saveUserToFirestore(String userId, String fullName, String email,String password) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("fullName", fullName);
+        user.put("email", email);
+        user.put("password", password);
+        user.put("isAdmin", false);
+        db.collection("users").document(userId).set(user)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(RegisterActivity.this, "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> Toast.makeText(RegisterActivity.this, "שגיאה בעת ניסיון הרישום: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void showTermsDialog() {
@@ -127,6 +142,24 @@ public class RegisterActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void checkEmailExists(String email, EmailCheckCallback callback) {
+        db.collection("users")
+                .whereEqualTo("email", email)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        boolean exists = !task.getResult().isEmpty();
+                        callback.onEmailChecked(exists);
+                    } else {
+                        Toast.makeText(RegisterActivity.this, "שגיאה בבדיקת המייל: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private interface EmailCheckCallback {
+        void onEmailChecked(boolean exists);
     }
 
     private static class HebrewInputFilter implements InputFilter {

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <ImageView
+        android:id="@+id/campaign_image"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="fitXY" />
+
+    <TextView
+        android:id="@+id/campaign_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Campaign Title"
+        android:textColor="#09101d"
+        android:textSize="18sp"
+        android:paddingTop="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="4dp">
+
+        <TextView
+            android:id="@+id/campaign_raised_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$3,462"
+            android:textColor="#13b156"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/campaign_goal_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" fund raised from $4,400"
+            android:textColor="#394452"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:progress="78"
+        android:paddingTop="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
+        <TextView
+            android:id="@+id/campaign_donators"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="2,367 Donators"
+            android:textColor="#13b156"
+            android:textSize="12sp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/campaign_days_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4 days left"
+            android:textColor="#13b156"
+            android:textSize="14sp" />
+    </LinearLayout>
+</LinearLayout>

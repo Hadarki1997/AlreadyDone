@@ -20,7 +20,6 @@ public class WelcomeScreen extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false);
 
-        // If user is logged in, navigate to HomeActivity
         if (isLoggedIn) {
             new Handler().postDelayed(this::navigateToHome, SPLASH_TIME_OUT);
         } else {
@@ -30,7 +29,7 @@ public class WelcomeScreen extends AppCompatActivity {
     }
 
     private void navigateToHome() {
-        Intent intent = new Intent(WelcomeScreen.this, HomeActivity.class);
+        Intent intent = new Intent(WelcomeScreen.this, MainActivity.class);
         startActivity(intent);
         finish();
     }

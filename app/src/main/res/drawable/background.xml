@@ -1,0 +1,11 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mesh_hologr"
+    android:layout_width="1920dp"
+    android:layout_height="960dp"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentTop="true"
+    android:clipToOutline="true"
+    android:background="#0E0B34"
+    />
+
