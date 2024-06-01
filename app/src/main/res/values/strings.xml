@@ -9,6 +9,10 @@
     <string name="back_button_desc">left button</string>
     <string name="search_desc">search</string>
     <string name="bookmark_desc">bookmark</string>
+    <string name="fund_raised_from">fund raised from</string>
+    <string name="donors"> תורמים</string>
+    <string name="days_left"> ימים שנותרו</string>
+    <string name="currency">$</string>
     <string-array name="categories_array">
         <item>בריאות</item>
         <item>נשים</item>

@@ -71,7 +71,8 @@ public class CampaignAdapter extends RecyclerView.Adapter<CampaignAdapter.Campai
         }
     }
 
-    static class CampaignViewHolder extends RecyclerView.ViewHolder {
+    // Public static inner class for ViewHolder
+    public static class CampaignViewHolder extends RecyclerView.ViewHolder {
         TextView titleTextView, raisedAmountTextView, goalAmountTextView, donatorsTextView, daysLeftTextView;
         ImageView campaignImageView;
         ProgressBar progressBar;
