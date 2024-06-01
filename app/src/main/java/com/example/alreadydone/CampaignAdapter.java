@@ -31,11 +31,14 @@ public class CampaignAdapter extends RecyclerView.Adapter<CampaignAdapter.Campai
         holder.titleTextView.setText(campaign.getTitle());
         holder.raisedAmountTextView.setText("$" + campaign.getCurrentAmount());
         holder.goalAmountTextView.setText("fund raised from $" + campaign.getGoalAmount());
-        holder.donatorsTextView.setText(campaign.getDonors() + " Donators");
-        holder.daysLeftTextView.setText(campaign.getDaysLeft() + " days left");
+        holder.donatorsTextView.setText(campaign.getDonors() + " תורמים");
+        holder.daysLeftTextView.setText(campaign.getDaysLeft() + " ימים שנותרו");
         holder.progressBar.setProgress((int) ((campaign.getCurrentAmount() / (float) campaign.getGoalAmount()) * 100));
 
-        if (!campaign.getImageUrl().isEmpty()) {
+        // Check if the image URL is empty and use the default image if it is
+        if (campaign.getImageUrl() == null || campaign.getImageUrl().isEmpty()) {
+            holder.campaignImageView.setImageResource(R.drawable.loginimg);
+        } else {
             Picasso.get().load(campaign.getImageUrl()).into(holder.campaignImageView);
         }
     }

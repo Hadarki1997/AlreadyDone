@@ -10,14 +10,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
-import java.util.ArrayList;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class AdminActivity extends AppCompatActivity {
 
-    private MaterialButton btnAddCampaign, btnAddOrganization, btnUpdateCampaign, btnUpdateOrganization, btnAddNotification, btnRemoveCampaign, btnRemoveOrganization, btnAddCategory;
+    private MaterialButton btnAddCampaign, btnAddOrganization, btnUpdateCampaign, btnUpdateOrganization, btnAddNotification, btnRemoveCampaign, btnRemoveOrganization;
     private FirebaseFirestore db;
     private Spinner spinnerCategory;
     private String selectedCategory;
@@ -30,12 +31,8 @@ public class AdminActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        // Initialize category list
-        categories = new ArrayList<>();
-        String[] initialCategories = getResources().getStringArray(R.array.categories_array);
-        for (String category : initialCategories) {
-            categories.add(category);
-        }
+        // Initialize category list from predefined categories
+        categories = getPredefinedCategories();
 
         spinnerCategory = findViewById(R.id.spinner_category);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
@@ -49,15 +46,7 @@ public class AdminActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                selectedCategory = "אחר"; // קטגוריית ברירת מחדל אם לא נבחרה קטגוריה
-            }
-        });
-
-        btnAddCategory = findViewById(R.id.btn_add_category);
-        btnAddCategory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAddCategoryDialog();
+                selectedCategory = "אחר"; // Default category if none is selected
             }
         });
 
@@ -119,26 +108,8 @@ public class AdminActivity extends AppCompatActivity {
         });
     }
 
-    private void showAddCategoryDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add New Category");
-
-        final View customLayout = getLayoutInflater().inflate(R.layout.dialog_add_category, null);
-        builder.setView(customLayout);
-
-        builder.setPositiveButton("Add", (dialog, which) -> {
-            TextInputEditText inputCategory = customLayout.findViewById(R.id.input_category);
-            String newCategory = inputCategory.getText().toString();
-            if (!newCategory.isEmpty() && !categories.contains(newCategory)) {
-                categories.add(newCategory);
-                ((ArrayAdapter) spinnerCategory.getAdapter()).notifyDataSetChanged();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
+    private List<String> getPredefinedCategories() {
+        return Arrays.asList(getResources().getStringArray(R.array.categories_array));
     }
 
     private void addCampaign() {
