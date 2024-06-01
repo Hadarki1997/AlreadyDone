@@ -12,7 +12,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 public class CampaignAdapter extends RecyclerView.Adapter<CampaignAdapter.CampaignViewHolder> {
-    private List<Campaign> campaignList;
+    private final List<Campaign> campaignList;
 
     public CampaignAdapter(List<Campaign> campaignList) {
         this.campaignList = campaignList;
@@ -28,24 +28,47 @@ public class CampaignAdapter extends RecyclerView.Adapter<CampaignAdapter.Campai
     @Override
     public void onBindViewHolder(@NonNull CampaignViewHolder holder, int position) {
         Campaign campaign = campaignList.get(position);
-        holder.titleTextView.setText(campaign.getTitle());
-        holder.raisedAmountTextView.setText("$" + campaign.getCurrentAmount());
-        holder.goalAmountTextView.setText("fund raised from $" + campaign.getGoalAmount());
-        holder.donatorsTextView.setText(campaign.getDonors() + " תורמים");
-        holder.daysLeftTextView.setText(campaign.getDaysLeft() + " ימים שנותרו");
-        holder.progressBar.setProgress((int) ((campaign.getCurrentAmount() / (float) campaign.getGoalAmount()) * 100));
 
-        // Check if the image URL is empty and use the default image if it is
-        if (campaign.getImageUrl() == null || campaign.getImageUrl().isEmpty()) {
-            holder.campaignImageView.setImageResource(R.drawable.loginimg);
-        } else {
-            Picasso.get().load(campaign.getImageUrl()).into(holder.campaignImageView);
-        }
+        // Set the campaign title
+        holder.titleTextView.setText(campaign.getTitle());
+
+        // Set the raised amount
+        holder.raisedAmountTextView.setText("$" + campaign.getCurrentAmount());
+
+        // Set the goal amount
+        holder.goalAmountTextView.setText("fund raised from $" + campaign.getGoalAmount());
+
+        // Set the number of donors
+        holder.donatorsTextView.setText(campaign.getDonors() + " תורמים");
+
+        // Set the number of days left
+        holder.daysLeftTextView.setText(campaign.getDaysLeft() + " ימים שנותרו");
+
+        // Calculate and set the progress bar value
+        int progress = calculateProgress(campaign.getCurrentAmount(), campaign.getGoalAmount());
+        holder.progressBar.setProgress(progress);
+
+        // Load the campaign image or set a default image if URL is empty
+        loadImage(holder.campaignImageView, campaign.getImageUrl());
     }
 
     @Override
     public int getItemCount() {
         return campaignList.size();
+    }
+
+    // Helper method to calculate progress
+    private int calculateProgress(double currentAmount, double goalAmount) {
+        return (int) ((currentAmount / goalAmount) * 100);
+    }
+
+    // Helper method to load image
+    private void loadImage(ImageView imageView, String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageView.setImageResource(R.drawable.loginimg);
+        } else {
+            Picasso.get().load(imageUrl).into(imageView);
+        }
     }
 
     static class CampaignViewHolder extends RecyclerView.ViewHolder {
@@ -55,12 +78,12 @@ public class CampaignAdapter extends RecyclerView.Adapter<CampaignAdapter.Campai
 
         public CampaignViewHolder(View itemView) {
             super(itemView);
-            titleTextView = itemView.findViewById(R.id.campaign_title);
-            raisedAmountTextView = itemView.findViewById(R.id.campaign_raised_amount);
-            goalAmountTextView = itemView.findViewById(R.id.campaign_goal_amount);
-            donatorsTextView = itemView.findViewById(R.id.campaign_donators);
-            daysLeftTextView = itemView.findViewById(R.id.campaign_days_left);
-            campaignImageView = itemView.findViewById(R.id.campaign_image);
+            titleTextView = itemView.findViewById(R.id.campaignName);
+            raisedAmountTextView = itemView.findViewById(R.id.campaignRaised);
+            goalAmountTextView = itemView.findViewById(R.id.campaignGoal);
+            donatorsTextView = itemView.findViewById(R.id.campaignDonators);
+            daysLeftTextView = itemView.findViewById(R.id.campaignDaysLeft);
+            campaignImageView = itemView.findViewById(R.id.campaignImage);
             progressBar = itemView.findViewById(R.id.progressBar);
         }
     }

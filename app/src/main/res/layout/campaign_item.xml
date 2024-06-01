@@ -69,7 +69,7 @@
             android:layout_marginTop="4dp">
 
             <TextView
-                android:id="@+id/donators"
+                android:id="@+id/campaignDonators"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -78,7 +78,7 @@
                 android:textColor="@android:color/holo_green_dark" />
 
             <TextView
-                android:id="@+id/daysLeft"
+                android:id="@+id/campaignDaysLeft"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
